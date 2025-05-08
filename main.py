@@ -51,9 +51,9 @@ def run_flask():
     app.run(host='0.0.0.0', port=8080)
 
 # === CONFIG BOT ===
-TOKEN = '7772430104:AAE-BUbO8xMnfUM8Y9PoMefREW49UFSEL9U'
-ADMIN_ID = 7350223087
-CHANNEL_ID = '-1002695927554'
+TOKEN = os.environ['7772430104:AAE-BUbO8xMnfUM8Y9PoMefREW49UFSEL9U']
+ADMIN_ID = int(os.environ['7350223087'])
+CHANNEL_ID = os.environ['-1002695927554']
 FICHIER_COMMANDES = 'commandes.txt'
 FICHIER_COMMANDES_TERMINEES = 'commandes_terminees.txt'
 
