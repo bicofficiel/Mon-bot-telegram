@@ -510,9 +510,16 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_main_menu(update, context)
     elif context.user_data.get("awaiting_order"):
         commande = update.message.text
+        user_id = update.effective_user.id
+        if user_id not in commandes_utilisateurs:
+            commandes_utilisateurs[user_id] = []
+        commandes_utilisateurs[user_id].append(commande)
         commandes_stockees.append(commande)
         with open(FICHIER_COMMANDES, 'w', encoding='utf-8') as f:
             f.write("\n\n".join(commandes_stockees))
+        user_file = f"commandes_{user_id}.txt"
+        with open(user_file, 'w', encoding='utf-8') as f:
+            f.write(commande)
         await context.bot.send_message(chat_id=CHANNEL_ID, text=commande)
         await update.message.reply_text("Commande sauvegardée avec succès!")
         context.user_data["awaiting_order"] = False
