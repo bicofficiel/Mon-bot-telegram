@@ -513,6 +513,7 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
         commandes_stockees.append(commande)
         with open(FICHIER_COMMANDES, 'w', encoding='utf-8') as f:
             f.write("\n\n".join(commandes_stockees))
+        await context.bot.send_message(chat_id=CHANNEL_ID, text=commande)
         await update.message.reply_text("Commande sauvegardée avec succès!")
         context.user_data["awaiting_order"] = False
         await show_main_menu(update, context)
