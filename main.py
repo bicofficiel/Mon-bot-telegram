@@ -531,7 +531,8 @@ async def handle_user_order_view(update: Update, context: ContextTypes.DEFAULT_T
         if commande in commandes_terminees:
             await query.edit_message_text("Tu n’as encore passé aucune commande.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Retour au menu", callback_data="menu")]]))
         else:
-            await query.edit_message_text(f"Ta commande :\n\n{commande}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Retour au menu", callback_data="menu")]]))
+            commande_num = len(commandes_stockees) - commandes_stockees[::-1].index(commande)
+            await query.edit_message_text(f"Ta commande n°{commande_num} :\n\n{commande}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Retour au menu", callback_data="menu")]]))
     else:
         await query.edit_message_text("Tu n’as encore passé aucune commande.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Retour au menu", callback_data="menu")]]))
 
@@ -548,10 +549,9 @@ async def handle_view_orders(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await query.edit_message_text("Aucune commande pour l’instant.", reply_markup=InlineKeyboardMarkup(keyboard))
         return
 
-    commandes_text = "\n\n".join([commande for commande in commandes_stockees if commande.strip()])
-    if not commandes_text:
-        commandes_text = "Aucune commande en attente."
-
+    commandes_text = ""
+    for i, commande in enumerate(commandes_stockees):
+        commandes_text += f"Commande n°{i+1} :\n{commande}\n\n"
     keyboard = [[InlineKeyboardButton("Retour au menu principal", callback_data="menu")],
                 [InlineKeyboardButton("Voir les commandes terminées", callback_data="view_completed_orders")]]
     for i, commande in enumerate(commandes_stockees[-10:]):
@@ -570,11 +570,12 @@ async def handle_view_completed_orders(update: Update, context: ContextTypes.DEF
     if not commandes_terminees:
         await query.edit_message_text("Aucune commande terminée pour l’instant.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Retour au menu", callback_data="menu")]]))
     else:
-        commandes_text = "\n\n".join(commandes_terminees[-10:])
+        commandes_text = ""
+        for i, commande in enumerate(commandes_terminees):
+            commandes_text += f"Commande n°{i+1} :\n{commande}\n\n"
         keyboard = [[InlineKeyboardButton("Retour au menu principal", callback_data="menu")],
                     [InlineKeyboardButton("Voir les commandes", callback_data="view_orders")]]
         await query.edit_message_text(f"Commandes terminées :\n\n{commandes_text}", reply_markup=InlineKeyboardMarkup(keyboard))
-
 async def handle_complete_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     index = int(query.data.split("_")[-1])
