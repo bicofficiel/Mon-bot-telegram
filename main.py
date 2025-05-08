@@ -524,18 +524,25 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_user_order_view(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    user_file = f"commandes_{query.from_user.id}.txt"
-    if os.path.exists(user_file):
-        with open(user_file, 'r', encoding='utf-8') as f:
-            commande = f.read()
-        if commande in commandes_terminees:
-            await query.edit_message_text("Tu n’as encore passé aucune commande.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Retour au menu", callback_data="menu")]]))
-        else:
-            commande_num = len(commandes_stockees) - commandes_stockees[::-1].index(commande)
-            await query.edit_message_text(f"Ta commande n°{commande_num} :\n\n{commande}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Retour au menu", callback_data="menu")]]))
-    else:
-        await query.edit_message_text("Tu n’as encore passé aucune commande.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Retour au menu", callback_data="menu")]]))
+    user_id = query.from_user.id
 
+    # Vérifier si l'utilisateur a des commandes enregistrées dans le dictionnaire
+    if user_id in commandes_utilisateurs:
+        commande = commandes_utilisateurs[user_id][-1]
+        await query.edit_message_text(f"Ta commande :\n\n{commande}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Retour au menu", callback_data="menu")]]))
+    else:
+        # Vérifier si l'utilisateur a un fichier de commande associé
+        user_file = f"commandes_{query.from_user.id}.txt"
+        if os.path.exists(user_file):
+            with open(user_file, 'r', encoding='utf-8') as f:
+                commande = f.read()
+            if commande in commandes_terminees:
+                await query.edit_message_text("Tu n’as encore passé aucune commande.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Retour au menu", callback_data="menu")]]))
+            else:
+                commande_num = len(commandes_stockees) - commandes_stockees[::-1].index(commande)
+                await query.edit_message_text(f"Ta commande n°{commande_num} :\n\n{commande}", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Retour au menu", callback_data="menu")]]))
+        else:
+            await query.edit_message_text("Tu n’as encore passé aucune commande.", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Retour au menu", callback_data="menu")]]))
 async def handle_view_orders(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user_id = query.from_user.id
